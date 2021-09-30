@@ -4,9 +4,9 @@ Flex Insights uses the `hang_up_by` conversations attribute to report on who hun
 
 This plugin aims to make some assumptions, in order to set the field as accurately as is possible for known scenarios, and default it to something in other cases. Those assumptions are:
 
-* If call is hung up by the agent by clicking Hangup, then we set `hang_up_by=Agent`
+* If call is hung up by the agent by clicking Hangup, then we set `hang_up_by='Agent'`
 * If call is transferred by the agent by completing a Transfer, then we clear the `hang_up_by` attribute for this reservation, and let the next reservation take over
-* In all other cases, we assume customer hung up, so we set `hang_up_by=Customer`
+* In all other cases, we assume customer hung up, so we set `hang_up_by='Customer'`
 
 ## Beware of Race Conditions with Task Attributes...
 
@@ -15,6 +15,9 @@ In this plugin, we don’t actually persist the `hang_up_by` attribute to the ta
 * Insights only pulls in a snapshot of the task attributes upon completion of the reservation - so changing the value before this point isn't needed, and...
 * Since Flex uses the same task for all reservations relating to a call - it can be tricky to protect against stale data overwrites due to multiple reservations writing to the same task. e.g. potentially a transferee agent’s Flex UI could update the task attributes while the transferring agent is still wrapping up their own reservation - for the same task! 
   * So best to just hold onto any state internally in the Flex app (and/or in backend orchestration service - if it’s critical business state needed outside of the Flex app), then persist any task attribute changes when you complete your reservation. So a single write - purely for ensuring the Flex Insights snapshot is accurate for the completed reservation/segment
+
+## Page Refreshes
+TODO: Add logic to detect if a call drops during a page refresh, and set to `hang_up_by='Agent'` in such cases.
 
 ## Further work
 
