@@ -16,6 +16,15 @@ In this plugin, we don’t actually persist the `hang_up_by` attribute to the ta
 * Since Flex uses the same task for all reservations relating to a call - it can be tricky to protect against stale data overwrites due to multiple reservations writing to the same task. e.g. potentially a transferee agent’s Flex UI could update the task attributes while the transferring agent is still wrapping up their own reservation - for the same task! 
   * So best to just hold onto any state internally in the Flex app (and/or in backend orchestration service - if it’s critical business state needed outside of the Flex app), then persist any task attribute changes when you complete your reservation. So a single write - purely for ensuring the Flex Insights snapshot is accurate for the completed reservation/segment
 
+## Further work
+
+In future, we would like to include additional guidance around:
+
+* IVR calls
+  * Calls that don't ever become tasks won't be reported on in Flex Insights out-of-the-box, and certainly won't benefit from this plugin. We have a great blog post on using Taskrouter to log IVR call segments to Flex Insights. See https://www.twilio.com/blog/ivr-with-flex-insights. Depending on your reporting needs, you may not need to set `hang_up_by` on these calls.
+* Calls that are hung up by customer before ever reaching an agent
+  * Again, these won't hit our plugin code, so you need to ask yourself if you care to report on who hung up such calls. It could be argued that - since Flex Insights offers reporting on these Abandoned calls already, it may be preferable to simply exclude suxh calls when reporting on `hang_up_by`. This would make sense if using this attribute specifically for coaching of agents.
+
 ## About Twilio Flex Plugins
 
 Twilio Flex Plugins allow you to customize the appearance and behavior of [Twilio Flex](https://www.twilio.com/flex). If you want to learn more about the capabilities and how to use the API, check out our [Flex documentation](https://www.twilio.com/docs/flex).
