@@ -21,9 +21,10 @@ In this plugin, we don’t actually persist the `hang_up_by` attribute to the ta
 In future, we would like to include additional guidance around:
 
 * IVR calls
-  * Calls that don't ever become tasks won't be reported on in Flex Insights out-of-the-box, and certainly won't benefit from this plugin. We have a great blog post on using Taskrouter to log IVR call segments to Flex Insights. See https://www.twilio.com/blog/ivr-with-flex-insights. Depending on your reporting needs, you may not need to set `hang_up_by` on these calls.
+  * Calls that don't ever become tasks won't be reported on in Flex Insights out-of-the-box, and certainly won't benefit from this plugin. We have a great blog post on using Taskrouter to log IVR call segments to Flex Insights. See https://www.twilio.com/blog/ivr-with-flex-insights. 
+  * Depending on your reporting needs (e.g. if just using it for agent coaching), you may not need to set `hang_up_by` on these calls.
 * Calls that are hung up by customer before ever reaching an agent
-  * Again, these won't hit our plugin code, so you need to ask yourself if you care to report on who hung up such calls. It could be argued that - since Flex Insights offers reporting on these Abandoned calls already, it may be preferable to simply exclude suxh calls when reporting on `hang_up_by`. This would make sense if using this attribute specifically for coaching of agents.
+  * Again, these won't hit our plugin code, so you need to ask yourself if you care to report on who hung up such calls. It could be argued that - since Flex Insights offers reporting on these Abandoned calls already, it may be preferable to simply exclude such calls when reporting on `hang_up_by`. This would make sense if using this attribute specifically for coaching of agents.
 
 ## About Twilio Flex Plugins
 
