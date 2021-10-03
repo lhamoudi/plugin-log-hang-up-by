@@ -1,6 +1,6 @@
 {
   "name": "plugin-log-hang-up-by",
-  "version": "1.0.0",
+  "version": "22.0.0",
   "private": true,
   "scripts": {
     "postinstall": "flex-plugin pre-script-check",

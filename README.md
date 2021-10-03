@@ -5,6 +5,7 @@ Flex Insights uses the `hang_up_by` conversations attribute to report on who hun
 This plugin aims to make some assumptions, in order to set the field as accurately as is possible for known scenarios, and default it to something in other cases. Those assumptions are:
 
 * If call is hung up by the agent by clicking Hangup, then we set `hang_up_by='Agent'`
+* If call is disconnected because the agent refreshed page or became unreachable, then we set `hang_up_by='Agent-System-Issue'`
 * If call is transferred by the agent by completing a Transfer, then we clear the `hang_up_by` attribute for this reservation, and let the next reservation take over
 * In all other cases, we assume customer hung up, so we set `hang_up_by='Customer'`
 
@@ -17,17 +18,31 @@ In this plugin, we don’t actually persist the `hang_up_by` attribute to the ta
   * So best to just hold onto any state internally in the Flex app (and/or in backend orchestration service - if it’s critical business state needed outside of the Flex app), then persist any task attribute changes when you complete your reservation. So a single write - purely for ensuring the Flex Insights snapshot is accurate for the completed reservation/segment
 
 ## Page Refreshes
-TODO: Add logic to detect if a call drops during a page refresh, and set to `hang_up_by='Agent'` in such cases.
+In the case of a page refresh, or the agent's Flex UI being unreachable for any reason - and subsequently requiring the agent to reload the UI - we want to track this for the purposes of reporting. As such, this plugin will detect such scenarios through use of persisted call state in local browser storage. If it's detected that a call was disconnected when the Flex UI wasn't *listening* (or as a result of a network issue on the agent side), then the plugin will set `hang_up_by='Agent-System-Issue'` - to allow for coaching opportunities.  
 
-## Further work
+
+## Further work, TODOs & Considerations
 
 In future, we would like to include additional guidance around:
 
 * IVR calls
-  * Calls that don't ever become tasks won't be reported on in Flex Insights out-of-the-box, and certainly won't benefit from this plugin. We have a great blog post on using Taskrouter to log IVR call segments to Flex Insights. See https://www.twilio.com/blog/ivr-with-flex-insights. 
+  * Calls that don't ever become tasks won't be reported on in Flex Insights out-of-the-box, and certainly won't benefit from this plugin. We have a great blog post on using Taskrouter to log IVR call segments to Flex Insights - if you do need to report on those calls. 
+    * See https://www.twilio.com/blog/ivr-with-flex-insights. 
   * Depending on your reporting needs (e.g. if just using it for agent coaching), you may not need to set `hang_up_by` on these calls.
-* Calls that are hung up by customer before ever reaching an agent
-  * Again, these won't hit our plugin code, so you need to ask yourself if you care to report on who hung up such calls. It could be argued that - since Flex Insights offers reporting on these Abandoned calls already, it may be preferable to simply exclude such calls when reporting on `hang_up_by`. This would make sense if using this attribute specifically for coaching of agents.
+  * If you do need to report on how IVR calls terminated, you will need to use the approach above - to get those call segments logged in Flex Insights.
+* Calls that are hung up post-IVR, but before ever reaching an agent
+  * Again, these won't hit our plugin code, so you need to decide if you care to report on who hung up such calls. Since these calls are Tasks, they will hit Flex Insights and be reportable - as "Abandoned" calls. 
+  * It could be argued that - since Flex Insights offers reporting on these Abandoned calls already, it may be preferable to simply exclude such calls when reporting on `hang_up_by`. This would make sense if using this attribute specifically for coaching of agents.
+* Transferred calls
+  * If we transfer a call - we clear out `hang_up_by` - so that only a single segment in the conversation ever has this attribute set in Insights
+  * But what if we transfer it externally, and so there is no downstream segment/reservation created?? 
+    * This opens up a whole discussion around detecting and reporting on warm & cold transfers - so TBD on this
+* Outbound calls
+  * Haven't fully considered this one.
+* Reservation-level Taskrouter attributes...
+  * A lot of this plugin logic is necessitated by the fact that multiple reservations for the same task share the same task attributes. As such, we have to be very careful on when we save those task attributes - for fear of inadvertently impacting another concurrent reservation for the same task/call. 
+  * It would be ideal if reservations could have their own ring-fenced attribute data model, and if Flex Insights could pull from this when grabbing the reporting snapshot on `reservation.completed`
+  * Moreso, we would be able to safely write to those reservation-level attributes immediately via the SDK - which would further mitigate risk of losing important reporting data due to us having to wait until task is completed before we persist.
 
 ## About Twilio Flex Plugins
 
