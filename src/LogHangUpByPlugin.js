@@ -195,7 +195,7 @@ export default class LogHangUpByPlugin extends FlexPlugin {
   /**
    * Saves the task attributes to the task - from our state object 
    */
-  persistTaskAttributes(task) {
+  async persistTaskAttributes(task) {
     if (!('conversations' in task.attributes)) {
       task.attributes.conversations = {};
     }
@@ -203,6 +203,6 @@ export default class LogHangUpByPlugin extends FlexPlugin {
       task.attributes.conversations.hang_up_by = this.callState.hangUpBy;
       // TODO: Maybe we can include preceded_by and followed_by - for tracking transfers
     }
-    task.setAttributes(task.attributes);
+    await task.setAttributes(task.attributes);
   }
 }
