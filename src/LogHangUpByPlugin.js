@@ -123,7 +123,7 @@ export default class LogHangUpByPlugin extends FlexPlugin {
     // Just a downside to Taskrouter using the SAME TASK for the entire lifecycle of a 
     // call.
     flex.Actions.addListener("beforeCompleteTask", (payload) => {
-      this.persistTaskAttributes(payload.task);
+      await this.persistTaskAttributes(payload.task);
       this.resetCallState();
     });
 
